@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { FaTwitter, FaTelegram, FaDiscord } from 'react-icons/fa';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -66,9 +67,18 @@ const Layout = ({ children }) => {
               🚀 Powered by degeneracy and community chaos 🚀
             </p>
             <div className="flex justify-center space-x-6 mb-4">
-              <a href="#" className="text-blue-400 hover:text-blue-300">📱 Twitter</a>
-              <a href="#" className="text-blue-400 hover:text-blue-300">💬 Telegram</a>
-              <a href="#" className="text-blue-400 hover:text-blue-300">🤖 Discord</a>
+              <a href="#" className="text-blue-400 hover:text-blue-300 flex items-center space-x-2">
+                <FaTwitter size={20} />
+                <span>Twitter</span>
+              </a>
+              <a href="#" className="text-blue-400 hover:text-blue-300 flex items-center space-x-2">
+                <FaTelegram size={20} />
+                <span>Telegram</span>
+              </a>
+              <a href="#" className="text-blue-400 hover:text-blue-300 flex items-center space-x-2">
+                <FaDiscord size={20} />
+                <span>Discord</span>
+              </a>
             </div>
             <p className="text-xs text-gray-500">
               ⚠️ Not financial advice. Memes may cause extreme portfolio volatility. ⚠️
