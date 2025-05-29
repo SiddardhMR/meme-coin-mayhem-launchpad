@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaTwitter, FaTelegram, FaDiscord } from 'react-icons/fa';
+import WalletButton from './WalletButton';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -49,9 +49,7 @@ const Layout = ({ children }) => {
               </Link>
             </div>
 
-            <button className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform">
-              🔗 Connect Wallet
-            </button>
+            <WalletButton />
           </div>
         </div>
       </nav>
