@@ -3,7 +3,7 @@ import React from 'react';
 import { useWallet } from '../hooks/useWallet';
 
 const WalletButton = () => {
-  const { isConnected, address, isConnecting, connectWallet, disconnectWallet, formatAddress } = useWallet();
+  const { isConnected, address, isConnecting, formatAddress } = useWallet();
 
   if (isConnected) {
     return (
@@ -13,28 +13,13 @@ const WalletButton = () => {
             🟢 {formatAddress(address)}
           </span>
         </div>
-        <button 
-          onClick={disconnectWallet}
-          className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 px-3 py-2 rounded-full text-sm font-semibold transition-all"
-        >
-          Disconnect
-        </button>
+        <w3m-button />
       </div>
     );
   }
 
   return (
-    <button 
-      onClick={connectWallet}
-      disabled={isConnecting}
-      className={`bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-2 rounded-full font-bold transition-transform ${
-        isConnecting 
-          ? 'opacity-70 cursor-not-allowed' 
-          : 'hover:scale-105'
-      }`}
-    >
-      {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
-    </button>
+    <w3m-connect-button />
   );
 };
 

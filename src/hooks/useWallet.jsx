@@ -1,94 +1,80 @@
 
 import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
+import { createWeb3Modal, defaultConfig } from '@web3modal/ethers/react';
+import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react';
+import { BrowserProvider } from 'ethers';
+
+// 1. Get projectId from WalletConnect Cloud
+const projectId = 'YOUR_PROJECT_ID'; // Replace with your actual project ID
+
+// 2. Set chains
+const chains = [
+  {
+    chainId: 1,
+    name: 'Ethereum',
+    currency: 'ETH',
+    explorerUrl: 'https://etherscan.io',
+    rpcUrl: 'https://cloudflare-eth.com'
+  }
+];
+
+// 3. Create a metadata object
+const metadata = {
+  name: 'Meme of the Day',
+  description: 'Your Daily Dose of Degeneracy',
+  url: 'https://memeoftheday.app',
+  icons: ['https://avatars.githubusercontent.com/u/37784886']
+};
+
+// 4. Create Ethers config
+const ethersConfig = defaultConfig({
+  metadata,
+  enableEIP6963: true,
+  enableInjected: true,
+  enableCoinbase: true,
+  rpcUrl: '...',
+  defaultChainId: 1
+});
+
+// 5. Create a Web3Modal instance
+createWeb3Modal({
+  ethersConfig,
+  chains,
+  projectId,
+  enableAnalytics: true
+});
 
 export const useWallet = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState('');
+  const { address, chainId, isConnected } = useWeb3ModalAccount();
+  const { walletProvider } = useWeb3ModalProvider();
   const [isConnecting, setIsConnecting] = useState(false);
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("MetaMask not found! Please install MetaMask to continue.");
-      return;
-    }
-
     try {
       setIsConnecting(true);
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
-      
-      setAddress(userAddress);
-      setIsConnected(true);
-      
-      // Store connection in localStorage
-      localStorage.setItem('walletConnected', 'true');
-      localStorage.setItem('walletAddress', userAddress);
-      
-      console.log("Connected:", userAddress);
+      // Web3Modal handles the connection
+      const modal = document.querySelector('w3m-modal');
+      if (modal) {
+        modal.open();
+      }
     } catch (error) {
       console.error("Failed to connect wallet:", error);
-      alert("Failed to connect wallet. Please try again.");
     } finally {
       setIsConnecting(false);
     }
   };
 
-  const disconnectWallet = () => {
-    setIsConnected(false);
-    setAddress('');
-    localStorage.removeItem('walletConnected');
-    localStorage.removeItem('walletAddress');
-  };
-
-  // Check if wallet was previously connected
-  useEffect(() => {
-    const checkConnection = async () => {
-      const wasConnected = localStorage.getItem('walletConnected');
-      const savedAddress = localStorage.getItem('walletAddress');
-      
-      if (wasConnected && savedAddress && window.ethereum) {
-        try {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          const accounts = await provider.listAccounts();
-          
-          if (accounts.length > 0 && accounts[0].toLowerCase() === savedAddress.toLowerCase()) {
-            setAddress(savedAddress);
-            setIsConnected(true);
-          } else {
-            // Clear stored data if account doesn't match
-            localStorage.removeItem('walletConnected');
-            localStorage.removeItem('walletAddress');
-          }
-        } catch (error) {
-          console.error("Error checking wallet connection:", error);
-        }
+  const disconnectWallet = async () => {
+    try {
+      // Web3Modal handles disconnection
+      const modal = document.querySelector('w3m-modal');
+      if (modal) {
+        modal.close();
       }
-    };
-
-    checkConnection();
-
-    // Listen for account changes
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length === 0) {
-          disconnectWallet();
-        } else {
-          const newAddress = accounts[0];
-          setAddress(newAddress);
-          localStorage.setItem('walletAddress', newAddress);
-        }
-      });
+    } catch (error) {
+      console.error("Failed to disconnect wallet:", error);
     }
-
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeAllListeners('accountsChanged');
-      }
-    };
-  }, []);
+  };
 
   const formatAddress = (addr) => {
     if (!addr) return '';
@@ -101,6 +87,7 @@ export const useWallet = () => {
     isConnecting,
     connectWallet,
     disconnectWallet,
-    formatAddress
+    formatAddress,
+    chainId
   };
 };
