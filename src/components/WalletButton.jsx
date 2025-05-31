@@ -1,9 +1,14 @@
 
 import React from 'react';
-import { useWallet } from '../hooks/useWallet';
+import { useAccount } from 'wagmi';
 
 const WalletButton = () => {
-  const { isConnected, address, isConnecting, formatAddress } = useWallet();
+  const { address, isConnected } = useAccount();
+
+  const formatAddress = (addr) => {
+    if (!addr) return '';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   if (isConnected) {
     return (

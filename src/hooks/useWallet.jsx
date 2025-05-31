@@ -1,24 +1,16 @@
 
-import { useState, useEffect } from 'react';
-import { createWeb3Modal, defaultConfig } from '@web3modal/ethers/react';
-import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react';
-import { ethers } from 'ethers';
+import { useState } from 'react';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
+import { WagmiProvider } from 'wagmi';
+import { arbitrum, mainnet } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
 // 1. Get projectId from WalletConnect Cloud
 const projectId = 'YOUR_PROJECT_ID'; // Replace with your actual project ID
 
-// 2. Set chains
-const chains = [
-  {
-    chainId: 1,
-    name: 'Ethereum',
-    currency: 'ETH',
-    explorerUrl: 'https://etherscan.io',
-    rpcUrl: 'https://cloudflare-eth.com'
-  }
-];
-
-// 3. Create a metadata object
+// 2. Create wagmiConfig
 const metadata = {
   name: 'Meme of the Day',
   description: 'Your Daily Dose of Degeneracy',
@@ -26,37 +18,30 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
-// 4. Create Ethers config
-const ethersConfig = defaultConfig({
+const chains = [mainnet, arbitrum];
+const config = defaultWagmiConfig({
+  chains,
+  projectId,
   metadata,
-  enableEIP6963: true,
-  enableInjected: true,
-  enableCoinbase: true,
-  rpcUrl: '...',
-  defaultChainId: 1
 });
 
-// 5. Create a Web3Modal instance
+// 3. Create modal
 createWeb3Modal({
-  ethersConfig,
-  chains,
+  wagmiConfig: config,
   projectId,
   enableAnalytics: true
 });
 
 export const useWallet = () => {
-  const { address, chainId, isConnected } = useWeb3ModalAccount();
-  const { walletProvider } = useWeb3ModalProvider();
+  const { address, isConnected, chainId } = useAccount();
+  const { connect } = useConnect();
+  const { disconnect } = useDisconnect();
   const [isConnecting, setIsConnecting] = useState(false);
 
   const connectWallet = async () => {
     try {
       setIsConnecting(true);
       // Web3Modal handles the connection
-      const modal = document.querySelector('w3m-modal');
-      if (modal) {
-        modal.open();
-      }
     } catch (error) {
       console.error("Failed to connect wallet:", error);
     } finally {
@@ -66,11 +51,7 @@ export const useWallet = () => {
 
   const disconnectWallet = async () => {
     try {
-      // Web3Modal handles disconnection
-      const modal = document.querySelector('w3m-modal');
-      if (modal) {
-        modal.close();
-      }
+      disconnect();
     } catch (error) {
       console.error("Failed to disconnect wallet:", error);
     }
@@ -88,6 +69,7 @@ export const useWallet = () => {
     connectWallet,
     disconnectWallet,
     formatAddress,
-    chainId
+    chainId,
+    config // Export config for provider
   };
 };
