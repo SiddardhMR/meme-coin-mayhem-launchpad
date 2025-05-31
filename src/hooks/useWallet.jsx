@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createWeb3Modal, defaultConfig } from '@web3modal/ethers/react';
 import { useWeb3ModalProvider, useWeb3ModalAccount } from '@web3modal/ethers/react';
-import { BrowserProvider } from 'ethers';
+import { ethers } from 'ethers';
 
 // 1. Get projectId from WalletConnect Cloud
 const projectId = 'YOUR_PROJECT_ID'; // Replace with your actual project ID
