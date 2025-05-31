@@ -2,8 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
+import { useSupabase } from '../hooks/useSupabase';
 
 const Home = () => {
+  const { images, loading, error } = useSupabase();
+
   return (
     <div className="container mx-auto px-4">
       {/* Hero Section */}
@@ -24,17 +27,63 @@ const Home = () => {
           
           <div className="flex flex-col md:flex-row gap-6 justify-center mb-16">
             <Link 
-              to="/submit" 
-              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-full text-xl font-bold hover:scale-105 transition-transform shadow-lg hover:shadow-pink-500/25"
-            >
-              🚀 Submit a Meme
-            </Link>
-            <Link 
               to="/vote" 
               className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-8 py-4 rounded-full text-xl font-bold hover:scale-105 transition-transform shadow-lg hover:shadow-blue-500/25"
             >
               🗳️ Vote Now
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Meme from Supabase */}
+      <section className="py-16">
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+          <h2 className="text-4xl font-bold text-center text-white mb-8">
+            🎨 Featured Meme 🎨
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="text-center">
+              <div className="bg-gradient-to-r from-purple-400 to-pink-500 p-4 rounded-2xl inline-block mb-4">
+                {loading ? (
+                  <div className="w-64 h-64 bg-gray-300 rounded-xl animate-pulse flex items-center justify-center">
+                    <span className="text-gray-500">Loading...</span>
+                  </div>
+                ) : error ? (
+                  <div className="w-64 h-64 bg-red-200 rounded-xl flex items-center justify-center">
+                    <span className="text-red-500">Error loading image</span>
+                  </div>
+                ) : images.length > 0 ? (
+                  <img 
+                    src={images[0].image} 
+                    alt="Featured meme" 
+                    className="w-64 h-64 object-cover rounded-xl"
+                  />
+                ) : (
+                  <div className="w-64 h-64 bg-gray-300 rounded-xl flex items-center justify-center">
+                    <span className="text-gray-500">No images available</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="text-center md:text-left">
+              <h3 className="text-3xl font-bold text-white mb-2">🚀 Community Choice</h3>
+              <p className="text-xl text-purple-300 mb-4">Fresh from the community!</p>
+              <p className="text-gray-300 mb-6">
+                "This meme represents the best of our community's creativity and humor. Get ready for some serious degeneracy! 🌙"
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link 
+                  to="/vote"
+                  className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
+                >
+                  🗳️ Vote for This
+                </Link>
+                <button className="bg-white/20 text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-colors">
+                  📤 Share
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
