@@ -49,7 +49,7 @@ export const useIpVoting = () => {
       const { error } = await supabase
         .from('Postimages')
         .upsert({
-          ip-add: userIp,
+          'ip-add': userIp,
           vote: true,
           voted_at: new Date().toISOString()
         }, {
