@@ -6,7 +6,7 @@ import { useIpVoting } from '../hooks/useIpVoting';
 
 const Home = () => {
   const { images, loading, error } = useSupabase();
-  const { userIp, hasVoted, loading: voteLoading, submitVote } = useIpVoting();
+  const { userIp, hasVoted, voteCount, loading: voteLoading, submitVote } = useIpVoting();
 
   const handleVoteClick = async () => {
     const success = await submitVote();
@@ -87,16 +87,12 @@ const Home = () => {
                   <button className="bg-gray-500 text-white px-6 py-3 rounded-full font-bold cursor-not-allowed">
                     Loading...
                   </button>
-                ) : hasVoted ? (
-                  <button className="bg-green-500 text-white px-6 py-3 rounded-full font-bold cursor-not-allowed">
-                    ✅ Already Voted
-                  </button>
                 ) : (
                   <button 
                     onClick={handleVoteClick}
                     className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
                   >
-                    🗳️ Vote for This
+                    🗳️ Vote for This {hasVoted && voteCount > 0 ? `(${voteCount})` : ''}
                   </button>
                 )}
                 <button className="bg-white/20 text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-colors">
