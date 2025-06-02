@@ -36,5 +36,11 @@ export const useSupabase = () => {
     fetchImages();
   }, []);
 
-  return { images, loading, error, refetch: fetchImages };
+  return { 
+    images, 
+    loading, 
+    error, 
+    refetch: fetchImages,
+    supabase // Export supabase client for other hooks to use
+  };
 };

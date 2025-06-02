@@ -1,11 +1,21 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import CountdownTimer from '../components/CountdownTimer';
 import { useSupabase } from '../hooks/useSupabase';
+import { useIpVoting } from '../hooks/useIpVoting';
 
 const Home = () => {
   const { images, loading, error } = useSupabase();
+  const { userIp, hasVoted, loading: voteLoading, submitVote } = useIpVoting();
+
+  const handleVoteClick = async () => {
+    const success = await submitVote();
+    if (success) {
+      console.log('Vote counted successfully!');
+    } else {
+      console.error('Failed to submit vote');
+    }
+  };
 
   return (
     <div className="container mx-auto px-4">
@@ -73,16 +83,31 @@ const Home = () => {
                 "This meme represents the best of our community's creativity and humor. Get ready for some serious degeneracy! 🌙"
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link 
-                  to="/vote"
-                  className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
-                >
-                  🗳️ Vote for This
-                </Link>
+                {voteLoading ? (
+                  <button className="bg-gray-500 text-white px-6 py-3 rounded-full font-bold cursor-not-allowed">
+                    Loading...
+                  </button>
+                ) : hasVoted ? (
+                  <button className="bg-green-500 text-white px-6 py-3 rounded-full font-bold cursor-not-allowed">
+                    ✅ Already Voted
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleVoteClick}
+                    className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
+                  >
+                    🗳️ Vote for This
+                  </button>
+                )}
                 <button className="bg-white/20 text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-colors">
                   📤 Share
                 </button>
               </div>
+              {userIp && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Your IP: {userIp}
+                </p>
+              )}
             </div>
           </div>
         </div>
