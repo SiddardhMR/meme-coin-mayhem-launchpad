@@ -22,7 +22,7 @@ export const useIpVoting = () => {
           const { data: voteData, error } = await supabase
             .from('Postimages')
             .select('vote')
-            .eq('ip_address', data.ip)
+            .eq('ip-add', data.ip)
             .single();
 
           if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
@@ -49,11 +49,11 @@ export const useIpVoting = () => {
       const { error } = await supabase
         .from('Postimages')
         .upsert({
-          ip_address: userIp,
+          ip-add: userIp,
           vote: true,
           voted_at: new Date().toISOString()
         }, {
-          onConflict: 'ip_address'
+          onConflict: 'ip-add'
         });
 
       if (error) {
