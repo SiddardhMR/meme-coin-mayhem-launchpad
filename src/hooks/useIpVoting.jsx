@@ -10,67 +10,86 @@ export const useIpVoting = () => {
   const { supabase } = useSupabase();
 
   useEffect(() => {
-    const fetchIpAndCheckVote = async () => {
+    const fetchIpAndVoteStatus = async () => {
       try {
-        // Fetch user IP
+        // Get user IP
         const response = await fetch('https://api.ipify.org?format=json');
         const data = await response.json();
         console.log('User IP:', data.ip);
         setUserIp(data.ip);
 
-        // Check if user has voted and get current vote count
         if (data.ip && supabase) {
+          // Check if user already voted
           const { data: voteData, error } = await supabase
-            .from('Postimages')
+            .from('Votes')
             .select('vote')
-            .eq('ip-add', data.ip)
+            .eq('ip_add', data.ip)
             .single();
 
-          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-            console.error('Error checking vote status:', error);
-          } else if (voteData && voteData.vote > 0) {
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching vote status:', error);
+          } else if (voteData) {
             setHasVoted(true);
             setVoteCount(voteData.vote);
           }
         }
       } catch (err) {
-        console.error('Failed to fetch IP or check vote:', err);
+        console.error('Failed to fetch IP or vote status:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchIpAndCheckVote();
+    fetchIpAndVoteStatus();
   }, [supabase]);
 
   const submitVote = async () => {
     if (!userIp || !supabase) return false;
 
     try {
-      // Get current vote count for this IP
+      // Check existing vote
       const { data: currentData, error: fetchError } = await supabase
-        .from('Postimages')
+        .from('Votes')
         .select('vote')
-        .eq('ip-add', userIp)
+        .eq('ip_add', userIp)
         .single();
 
-      let newVoteCount = 1;
-      if (currentData && currentData.vote) {
-        newVoteCount = currentData.vote + 1;
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching current vote:', fetchError);
+        return false;
       }
 
-      // Insert or update vote record with incremented count
-      const { error } = await supabase
-        .from('Postimages')
-        .upsert({
-          'ip-add': userIp,
-          vote: newVoteCount
-        }, {
-          onConflict: 'ip-add'
-        });
+      if (!currentData) {
+        // Insert new vote record
+        const { error: insertError } = await supabase
+          .from('Votes')
+          .insert({
+            ip_add: userIp,
+            vote: 1,
+          });
 
-      if (error) {
-        console.error('Error submitting vote:', error);
+        if (insertError) {
+          console.error('Error inserting new vote:', insertError);
+          return false;
+        }
+
+        setHasVoted(true);
+        setVoteCount(1);
+        console.log('Vote submitted successfully for IP:', userIp, 'New count:', 1);
+        return true;
+      }
+
+      // Update existing vote count
+      const newVoteCount = currentData.vote + 1;
+      const { error: updateError } = await supabase
+        .from('Votes')
+        .update({
+          vote: newVoteCount,
+        })
+        .eq('ip_add', userIp);
+
+      if (updateError) {
+        console.error('Error updating vote:', updateError);
         return false;
       }
 
@@ -89,6 +108,6 @@ export const useIpVoting = () => {
     hasVoted,
     voteCount,
     loading,
-    submitVote
+    submitVote,
   };
 };
