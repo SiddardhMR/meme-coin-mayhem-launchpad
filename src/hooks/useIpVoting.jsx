@@ -20,7 +20,7 @@ export const useIpVoting = () => {
         // Check if user has voted
         if (data.ip && supabase) {
           const { data: voteData, error } = await supabase
-            .from('user_votes')
+            .from('Postimages')
             .select('vote')
             .eq('ip_address', data.ip)
             .single();
@@ -47,7 +47,7 @@ export const useIpVoting = () => {
     try {
       // Insert or update vote record
       const { error } = await supabase
-        .from('user_votes')
+        .from('Postimages')
         .upsert({
           ip_address: userIp,
           vote: true,
